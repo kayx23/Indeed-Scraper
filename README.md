@@ -16,14 +16,21 @@ As of Jan 23, 2021, around 82,000 jobs in Ontario were listed on Indeed. A lot o
 I decided to not scrape these similar postings in this excercise. 
 
 ### Why are there three scrapers? 
-Google reCAPTCHA throws 5 to 10 reCAPTCHAs in one setting when detecting a large amount of requests coming from the same proxy, same user agent. I first wrote the scraper with requests and bs4, which encountered by reCAPTCHA about 900 jobs into scraping. With the same bs4 code, I switched to selenium to add a logic so that when detecting Google reCAPTCHA, pause the program for user input to resolve. The program did pause when there is a reCAPTCHA (about 1000 jobs in), but for some reasons I did not spent too much time looking into, the scraper stopped after I manually resolved the blocking reCAPTCHA. 
+Because my initial attempts were countered by anti-scraping mechanism, such as [Google reCAPTCHA](https://www.google.com/recaptcha/about/). 
 
-From here, there are several solutions I thought of:      
-* continue to debug the "pausing for the user to resolve reCAPTCHA" logic until it works;
-* get past the reCAPTCHA by speech-to-text transcribing (abusing?) the audio file in the accessability option; 
-* rotate user agents and/or proxies so that the scraper does not get reCAPTCHA blokage in the first place
+Google reCAPTCHA throws 5 to 10 reCAPTCHAs in one setting when a large amount of requests are detected from the same address, same user agent etc. 
 
-Rotating user agents is the easiest option, and is probably sufficient since I only have 500 more jobs to scrape. I could have mannually set up user agent rotation with requests or selenium, which should have really served my purpose. At the same time, I started to play with [Scrapy](https://scrapy.org), liked its asynchronous design, and re-wrote my script with it. I also found a [scrapy user agent middleware](https://pypi.org/project/scrapy-user-agents/) that I can directly use, so I ended up using Scrapy which finally scraped all 1500 jobs, which took about 3 mins.
+I first wrote the scraper with **Requests** and **bs4**, which was stopped by reCAPTCHA about 900 jobs/10 mins in. Hoping to manually resolve the reCAPTCHAs, I switched to the browser automation route with **Selenium**, adding a logic so that when Google reCAPTCHA is thrown, the program pauses and waits for the user input. The program did pause about 1000 jobs in and I was able to manually resolve the reCAPTCHAs, but for some unknown reasons, the scraper always stopped after the resolution of reCAPTCHAs. 
+
+
+At this stage, there are several solutions I considered:      
+* Continue to debug to figure out why the scraper was stopped after the manual resolution of reCAPTCHAs;
+* Get past the reCAPTCHA with speech-to-text transcribing the audio file in the accessability option (but this is clearly an abuse of features even if it works); or 
+* Rotate user agents and/or proxies to avoid triggering anti-scraping mechanism 
+
+I decided to go with the last option. 
+
+Instead of manually setting up user agent rotation, I found out that this could be easily set up with [Scrapy](https://scrapy.org), which is also asynchronous. I refactored my script to use Scrapy and used [scrapy user agent middleware](https://pypi.org/project/scrapy-user-agents/). The script successfully scraped all 1500 job posts in Ontario and took about 3 mins.
 
 ### How to use
 `requests + bs4` and `selenium + bs4` scrapers are in Jupyter Notebook. 
@@ -33,5 +40,5 @@ To run the `scrapy` scraper and save output in a json file (can also be csv or x
 $ cd scrapy
 $ scrapy crawl indeedSpider -O output.json
 ```
-Make sure you have the dependencies in the `requirements.txt`
+
 
